@@ -11,6 +11,34 @@ let completedTasks = 0;
 taskCount.textContent = totalTasks;
 compTask.textContent = `${completedTasks} of ${totalTasks}`;
 
+function saveTasks() {
+    const tasks = [];
+    const taskListItems = document.querySelectorAll('.task-list li');
+    taskListItems.forEach(item => {
+        const label = item.querySelector('label');
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        tasks.push({
+            text: label.textContent,
+            completed: checkbox.checked
+        });
+    });
+    localStorage.setItem('tasks', JSON.stringify(tasks));
+}
+
+// Load tasks from localStorage when the page loads
+window.addEventListener('load', () => {
+    const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+    tasks.forEach(task => {
+        const taskList = document.querySelector('.task-list');
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <input type="checkbox" id="taskCheck" ${task.completed ? 'checked' : ''}>
+            <label id="toDo">${task.text}</label>
+            <button class="deleteBtn"><img src="png/delete.svg" alt=""></button>
+        `;
+        taskList.appendChild(li);
+    });
+});
 
 // Event listener for the add button
 // This will add a new task to the list when the add button is clicked
@@ -35,7 +63,7 @@ add.addEventListener('click', ()=>{
         } else{
             totalTasks = 0;
         }
-
+        saveTasks();
     }
 })
 
@@ -59,6 +87,7 @@ listTask.addEventListener('click', function(event){
             emptyTask.style.display = 'flex';
         }
     }
+    saveTasks();
 })
 
 // Task completion logic the event listener for checkboxes
@@ -76,4 +105,6 @@ listTask.addEventListener('change', function(event) {
             checkbox.disabled = true;
         });    
     }
+    saveTasks();
 });
+
