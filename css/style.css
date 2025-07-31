@@ -160,7 +160,7 @@ input[type="text"]:focus{
 }
 .task-list li{
     width: 100%;
-    padding: 10px 0;
+    padding: 10px;
     display: flex;
     align-items: flex-start;
     justify-content: space-between; /* coming back to remove it */
