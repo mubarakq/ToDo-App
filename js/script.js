@@ -38,7 +38,8 @@ function renderTasks() {
   compTask.textContent = `${completedTasks} of ${totalTasks}`;
 
   // Show “No Tasks” message if empty
-  emptyTask.style.display = tasks.length === 0 ? 'flex' : 'none';
+  emptyTask.style.display = listTask.children.length === 0 ? 'flex' : 'none';
+  listTask.style.display = listTask.children.length === 0 ? 'none' : 'flex';
 }
 
 // ---- STEP 4: Add new task ----

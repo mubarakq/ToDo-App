@@ -154,9 +154,14 @@ input[type="text"]:focus{
 }
 .task-list{
     width: 100%;
+    height: 50dvh;
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+.task-list::-webkit-scrollbar{
+    display: none;
 }
 .task-list li{
     width: 100%;
@@ -196,3 +201,9 @@ input[type="text"]:focus{
     text-decoration: line-through;
     color: rgba(130, 132, 250, 1);
 }   
+.task-count{
+    width: 70%;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
