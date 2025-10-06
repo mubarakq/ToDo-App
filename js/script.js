@@ -1,78 +1,91 @@
-const add = document.getElementById('addTask')
-const inputs = document.getElementById('taskInput')
-const emptyTask = document.querySelector('.no-tasks')
-const taskCount = document.querySelector('.countTask')
-const compTask = document.querySelector('.countCompTask')
+// Get all the needed elements
+const add = document.getElementById('addTask');
+const inputs = document.getElementById('taskInput');
+const emptyTask = document.querySelector('.no-tasks');
+const taskCount = document.querySelector('.countTask');
+const compTask = document.querySelector('.countCompTask');
+const listTask = document.querySelector('.task-list');
 
+// Counters
 let totalTasks = 0;
 let completedTasks = 0;
 
+// ---- STEP 1: Load saved tasks from localStorage ----
+let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
 
-taskCount.textContent = totalTasks;
-compTask.textContent = `${completedTasks} of ${totalTasks}`;
+// ---- STEP 2: Function to save tasks into localStorage ----
+function saveTasks() {
+  localStorage.setItem('tasks', JSON.stringify(tasks));
+}
 
-// Event listener for the add button
-// This will add a new task to the list when the add button is clicked
-add.addEventListener('click', ()=>{
-    if(inputs.value.trim() ==''){
-        inputs.focus()
-    }else{
-        const taskList = document.querySelector('.task-list')
-        const li = document.createElement('li')
-        li.innerHTML = `
-            <input type="checkbox" id="taskCheck">
-            <label id="toDo">${inputs.value}</label>
-            <button class="deleteBtn"><img src="png/delete.svg" alt=""></button>
-        `
-        taskList.appendChild(li)
-        inputs.value = ''
-        emptyTask.style.display = 'none';
-        if(totalTasks >= 0){
-            totalTasks++;
-            taskCount.textContent = totalTasks;
-            compTask.textContent = `${completedTasks} of ${totalTasks}`;
-        } else{
-            totalTasks = 0;
-        }
-    }
-})
+// ---- STEP 3: Function to render tasks to the page ----
+function renderTasks() {
+  listTask.innerHTML = ''; // Clear old list
+  tasks.forEach(task => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <input type="checkbox" id="taskCheck" ${task.completed ? 'checked' : ''}>
+      <label id="toDo">${task.text}</label>
+      <button class="deleteBtn"><img src="png/delete.svg" alt=""></button>
+    `;
+    listTask.appendChild(li);
+  });
 
-// Event listener for the delete button
-// This will remove the task from the list when the delete button is clicked
-const listTask = document.querySelector('.task-list')
-listTask.addEventListener('click', function(event){
-    if(event.target.closest('.deleteBtn')){
-        event.stopPropagation();
-        const li = event.target.closest('li');
-        if(li) listTask.removeChild(li);
-        if(totalTasks > 0){
-            totalTasks--;
-            completedTasks = Math.max(0, completedTasks - 1);
-            taskCount.textContent = totalTasks;
-            compTask.textContent = `${completedTasks} of ${totalTasks}`;
-        } else{
-            totalTasks = 0;
-        }
-        if(listTask.children.length === 0){
-            emptyTask.style.display = 'flex';
-        }
-    }
-})
+  // Update counters
+  totalTasks = tasks.length;
+  completedTasks = tasks.filter(t => t.completed).length;
+  taskCount.textContent = totalTasks;
+  compTask.textContent = `${completedTasks} of ${totalTasks}`;
 
-// Task completion logic the event listener for checkboxes
-listTask.addEventListener('change', function(event) {
-    if (event.target && event.target.type === 'checkbox') {
-        if (event.target.checked) {
-            completedTasks++;
-        } else {
-            completedTasks = Math.max(0, completedTasks - 1);
-        }
-        compTask.textContent = `${completedTasks} of ${totalTasks}`;
+  // Show “No Tasks” message if empty
+  emptyTask.style.display = tasks.length === 0 ? 'flex' : 'none';
+}
 
-        const disabledLList = document.querySelectorAll('.task-list input[type="checkbox"]');
-        disabledLList.forEach((checkbox) => {
-            checkbox.disabled = true;
-        });    
-    }
+// ---- STEP 4: Add new task ----
+add.addEventListener('click', () => {
+  if (inputs.value.trim() == '') {
+    inputs.focus();
+  } else {
+    const newTask = {
+      text: inputs.value,
+      completed: false
+    };
+    tasks.push(newTask);    // add to array
+    saveTasks();            // save to localStorage
+    renderTasks();          // show on screen
+    inputs.value = '';      // clear input
+  }
 });
 
+// ---- STEP 5: Delete a task ----
+listTask.addEventListener('click', function(event) {
+  if (event.target.closest('.deleteBtn')) {
+    event.stopPropagation();
+    const li = event.target.closest('li');
+    const label = li.querySelector('label');
+
+    // Remove from array
+    tasks = tasks.filter(task => task.text !== label.textContent);
+    saveTasks();    // save changes
+    renderTasks();  // update display
+  }
+});
+
+// ---- STEP 6: Mark task as completed ----
+listTask.addEventListener('change', function(event) {
+  if (event.target && event.target.type === 'checkbox') {
+    const label = event.target.nextElementSibling; // get label beside checkbox
+    tasks.forEach(task => {
+      if (task.text === label.textContent) {
+        task.completed = event.target.checked;
+      }
+    });
+    saveTasks(); // save updated status
+    renderTasks();
+  }
+});
+
+// ---- STEP 7: Load all tasks when the page opens ----
+window.addEventListener('DOMContentLoaded', () => {
+  renderTasks();
+});
